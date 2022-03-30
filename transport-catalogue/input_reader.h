@@ -1,15 +1,21 @@
 #pragma once
+
+#include "transport_catalogue.h"
+#include <unordered_map>
+#include <istream>
 #include <string>
-#include <deque>
 
-namespace transport_catalogue::input_reader {
-    std::deque<std::string> ReadRequests();
-}
+namespace transport_catalogue {
+	namespace input_reader {
+		void ReadRequests(TransportCatalogue& catalogue, std::istream& input);
 
-namespace detail {
-    void RemoveBeginEndSpaces(std::string_view& str);
+		void ParseBus(TransportCatalogue& catalogue, std::string& bus);
 
-    std::string_view SeparatorString(std::string_view& str, char separator);
+		void ParseStop(TransportCatalogue& catalogue, std::string& stop_src_data, std::unordered_map<std::string, std::string>& stops);
 
-    void RemoveBeginSpace(std::string& data);
+		void ParseStopInfo(TransportCatalogue& catalogue, const std::string& first_stop, std::string& info);
+		
+		Coordinates ParseCoordinate(std::string& data);
+		
+	}
 }
