@@ -1,69 +1,67 @@
 #include "stat_reader.h"
 #include "input_reader.h"
-#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip>
+
+using namespace std::string_literals;
 
 namespace transport_catalogue::stat_reader {
 
-    //Перегрузка оператора для вывода структуры BusRoute
-    std::ostream& operator<<(std::ostream& out, const BusRoute& route_info)
-    {
-        using namespace std::string_literals;
-        if (!route_info.is_found) {
-            out << "Bus "s << route_info.bus_name << ": not found"s << std::endl;
-        }
-        else {
-            out << "Bus "s << route_info.bus_name << ": " << route_info.stops << " stops on route, "s << route_info.unique_stops <<
-                " unique stops, "s << route_info.true_length << " route length, "s << route_info.curvature << " curvature"s << std::endl;
-        }
-        return out;
-    }
+	std::ostream& operator<<(std::ostream& out, const RouteInfo& route_info) {
+		if (route_info.count_bus_stop == 0) {
+			out << "not found"s << std::endl;
+		} else {
+			out << route_info.count_bus_stop << " stops on route, "s << route_info.count_unique_bus_stop 
+				<< " unique stops, "s << std::setprecision(6) << route_info.lenght_route 
+				<< " route length, "s << std::setprecision(6) << route_info.curvature << " curvature"s 
+				<< std::endl;
+		}
+		return out;
+	}
 
-    //Перегрузка оператора для вывода структуры StopRoutes
-    std::ostream& operator<<(std::ostream& out, const StopRoutes& route_info)
-    {
-        using namespace std::string_literals;
-        if (!route_info.is_found) {
-            out << "Stop "s << route_info.stop_name << ": not found"s << std::endl;
-        }
-        else if (route_info.is_found && route_info.routes.empty()) {
-            out << "Stop "s << route_info.stop_name << ": no buses"s << std::endl;
-        }
-        else {
-            out << "Stop "s << route_info.stop_name << ": buses"s;
-            for (auto &i : route_info.routes) {
-                out << " "s << i;
-            }
-            out << std::endl;
-        }
-        return out;
-    }
-
-    //Чтение и обрабортка запросов на вывод
-    void StatReader(TransportCatalogue data) {
-        using namespace std::string_literals;
-        int num;
-        std::cin >> num;
-        std::cin.ignore();
-        for (int i = 0; i < num; ++i) {
-            std::string query;
-            std::getline(std::cin, query);
-            detail::RemoveBeginSpace(query);
-            if (query.substr(0, 3) == "Bus"s) {
-                query.erase(0, 3);
-                PrintBus(data.RouteInformation(query));
-            }
-            if (query.substr(0, 4) == "Stop"s) {
-                query.erase(0, 4);
-                PrintStop(data.StopInformation(query));
-            }
-        }
-    }
-
-    void PrintBus(const BusRoute data) {
-        std::cout << data;
-    }
-
-    void PrintStop(const StopRoutes &data) {
-        std::cout << data;
-    }    
+	void PrintBus(const TransportCatalogue& catalogue, const std::string& bus, std::ostream& out) {
+		const std::string bus_name = bus.substr(4);
+		out << "Bus "s << bus_name << ": "s;
+		out << catalogue.GetRouteInfo(bus_name);
+	}
+		
+	void PrintStop(const TransportCatalogue& catalogue, const std::string& stop, std::ostream& out) {
+		const std::string name = stop.substr(5);
+		out << "Stop "s << name << ": "s;
+		const auto buses_by_stop = catalogue.GetBusesThroughStop(name);
+		if (catalogue.GetStop(name) == nullptr) {
+			out << "not found"s << std::endl;
+		} else if (buses_by_stop.empty()) {
+			out << "no buses"s << std::endl;
+		} else { 
+			out << "buses"s;
+			for (const auto bus : buses_by_stop) {
+				out << " "s << bus;
+			}
+			out << std::endl;
+		}
+	}
+		
+	void StatReader(const TransportCatalogue& catalogue, std::istream& in, std::ostream& out) {
+		size_t count_requests = 0;
+		in >> count_requests;
+		std::string str;
+		size_t count = 0;
+		while (std::getline(in, str)) {
+			if (str.find("Bus"s) != std::string::npos) {
+				PrintBus(catalogue, str, out);
+				++count;
+			} else if (str.find("Stop"s) != std::string::npos) {
+				PrintStop(catalogue, str, out);
+				++count;
+			} else if (!str.empty()) {
+				++count;
+			} 
+			if (count >= count_requests) {
+				break;
+			}
+		}
+	}
+	
 }
