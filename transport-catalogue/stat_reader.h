@@ -1,15 +1,16 @@
 #pragma once
 
+#include <iostream>
 #include "transport_catalogue.h"
 
 namespace transport_catalogue::stat_reader {
-    void StatReader(TransportCatalogue t);
 
-    void PrintBus(const BusRoute r);
+	std::ostream& operator<<(std::ostream& out, const RouteInfo& info);
 
-    void PrintStop(const StopRoutes &s);
+	void PrintBus(const TransportCatalogue& catalogue, const std::string& bus, std::ostream& out);
 
-    std::ostream& operator<<(std::ostream& out, const BusRoute& route_info);
+	void PrintStop(const TransportCatalogue& catalogue, const std::string& stop, std::ostream& out);
 
-    std::ostream& operator<<(std::ostream& out, const StopRoutes& route_info);
+	void StatReader(const TransportCatalogue& catalogue, std::istream& in, std::ostream& out);
+
 }
