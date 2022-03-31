@@ -10,7 +10,7 @@ namespace transport_catalogue {
 		} 
 	}
 	
-	void TransportCatalogue::AddBus(std::string& name, const std::vector<std::string_view>& bus_stops, bool is_circular) {
+	void TransportCatalogue::AddBus(const std::string& name, const std::vector<std::string_view>& bus_stops, bool is_circular) {
 		buses_.push_back({ std::move(name), is_circular, bus_stops });
 		bus_by_name_[buses_.back().name] = &buses_.back();
 
@@ -19,7 +19,7 @@ namespace transport_catalogue {
 		}
 	}
 
-	void TransportCatalogue::AddStop(std::string& name, const Coordinates coords) {
+	void TransportCatalogue::AddStop(const std::string& name, const Coordinates coords) {
 		bus_stops_.push_back({ std::move(name), coords });
 		stop_by_name_[bus_stops_.back().name] = &bus_stops_.back();
 	}
