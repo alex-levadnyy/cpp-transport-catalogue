@@ -49,9 +49,9 @@ namespace transport_catalogue {
 		std::unordered_map<std::pair<const Stop*, const Stop*>, double, detail::StopsPairHasher> stops_to_dist_;
 
 	public:
-		void AddBus(std::string& name, const std::vector<std::string_view>& bus_stops, bool is_circular);
+		void AddBus(const std::string& name, const std::vector<std::string_view>& bus_stops, bool is_circular);
 
-		void AddStop(std::string& name, const Coordinates coords);
+		void AddStop(const std::string& name, const Coordinates coords);
 
 		void SetDistanceStops(std::string_view from, std::string_view to, const int distance);
 
