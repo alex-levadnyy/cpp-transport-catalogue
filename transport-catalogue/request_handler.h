@@ -7,18 +7,6 @@ namespace transport_catalogue {
 
 class RequestHandler;
 
-// Интерфейс взаимодействия ТК с интерфейсами ввода-вывода
-class TransportCatalogueHandler {
-public:
-    virtual void LoadData(TransportCatalogue& catalogue) const = 0;
-
-    virtual void AnswerRequests(const TransportCatalogue& catalogue,
-                                renderer::MapRenderer& renderer, std::ostream& requests_out) const = 0;
-protected:
-    ~TransportCatalogueHandler() = default;
-};
-
-
 // Фасад реализующий основные запросы к системе
 class RequestHandler final {
 public:

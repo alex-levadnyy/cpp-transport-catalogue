@@ -11,17 +11,17 @@
 namespace json_reader {
 
 // Класс для ввод/вывод данных TK в формате JSON
-class JsonLoader final : public transport_catalogue::TransportCatalogueHandler {
+class JsonLoader {
 public:
 
     // Читатет данные извходного потока
     JsonLoader(std::istream& data_in);
 
-    // Загрузка данных из ТК, ннастроки ренедера, обработка запросов и запись в выходной поток 
-    void LoadData(transport_catalogue::TransportCatalogue& catalogue) const override;
+    // Загрузка данных из ТК, настроки ренедера, обработка запросов и запись в выходной поток 
+    void LoadData(transport_catalogue::TransportCatalogue& catalogue) const;
     void LoadRenderSettings(renderer::MapRenderer& renderer) const;
     void AnswerRequests(const transport_catalogue::TransportCatalogue& catalogue,
-                        renderer::MapRenderer& renderer, std::ostream& requests_out) const override;
+                        renderer::MapRenderer& renderer, std::ostream& requests_out) const;
 
 private:
     // Устанавливает настройки рендера
@@ -48,15 +48,10 @@ private:
 
     // Проверка корректности данных
     static bool IsStop(const json::Node& node);
-
     static bool IsBuses(const json::Node& node);
-
     static bool IsBusesRequest(const json::Node& node);
-
     static bool IsStopRequest(const json::Node& node);
-
     static bool IsMapRequest(const json::Node& node);
-
  
     static svg::Color ReadColor(const json::Node& node);
     static svg::Point ReadOffset(const json::Array& node);

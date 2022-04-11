@@ -10,9 +10,7 @@ using namespace std::literals;
 
 void Object::Render(const RenderContext &context) const {
     context.Indention();
-
     RenderObject(context);
-
     context.out << std::endl;
 }
 

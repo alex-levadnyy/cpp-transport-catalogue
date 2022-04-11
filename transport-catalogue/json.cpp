@@ -284,11 +284,11 @@ namespace json {
     }  // namespace
 
     bool Node::IsNull() const {
-        return std::holds_alternative<nullptr_t>(node_);
+        return std::holds_alternative<nullptr_t>(*this);
     }
 
     bool Node::IsInt() const {
-        return std::holds_alternative<int>(node_);
+        return std::holds_alternative<int>(*this);
     }
 
     bool Node::IsDouble() const {
@@ -296,37 +296,37 @@ namespace json {
     }
 
     bool Node::IsPureDouble() const {
-        return std::holds_alternative<double>(node_);
+        return std::holds_alternative<double>(*this);
     }
 
     bool Node::IsBool() const {
-        return std::holds_alternative<bool>(node_);
+        return std::holds_alternative<bool>(*this);
     }
 
     bool Node::IsString() const {
-        return std::holds_alternative<std::string>(node_);
+        return std::holds_alternative<std::string>(*this);
     }
 
     bool Node::IsArray() const {
-        return std::holds_alternative<Array>(node_);
+        return std::holds_alternative<Array>(*this);
     }
 
     bool Node::IsMap() const {
-        return std::holds_alternative<Dict>(node_);
+        return std::holds_alternative<Dict>(*this);
     }
 
     bool Node::AsBool() const {
         if (!IsBool()) {
             throw std::logic_error("It is not bool!"s);
         }
-        return std::get<bool>(node_);
+        return std::get<bool>(*this);
     }
 
     int Node::AsInt() const {
         if (!IsInt()) {
             throw std::logic_error("It is not int!"s);
         }
-        return std::get<int>(node_);
+        return std::get<int>(*this);
     }
 
     double Node::AsDouble() const {
@@ -334,7 +334,7 @@ namespace json {
             throw std::logic_error("It is not double!"s);
         }
         if (IsPureDouble()) {
-            return std::get<double>(node_);
+            return std::get<double>(*this);
         }
         else {
             return AsInt();
@@ -345,25 +345,25 @@ namespace json {
         if (!IsString()) {
             throw std::logic_error("It is not string!"s);
         }
-        return std::get<std::string>(node_);
+        return std::get<std::string>(*this);
     }
 
     const Array& Node::AsArray() const {
         if (!IsArray()) {
             throw std::logic_error("It is not Array!"s);
         }
-        return std::get<Array>(node_);
+        return std::get<Array>(*this);
     }
 
     const Dict& Node::AsMap() const {
         if (!IsMap()) {
             throw std::logic_error("It is not map!"s);
         }
-        return std::get<Dict>(node_);
+        return std::get<Dict>(*this);
     }
 
     const NodeType& Node::GetValue() const {
-        return node_;
+        return *this;
     }
 
     Document::Document(Node root)

@@ -19,30 +19,10 @@ namespace json {
         using runtime_error::runtime_error;
     };
 
-    class Node {
+    class Node : public NodeType {
     public:
-        Node() = default;
-        Node(bool value)
-            : node_(value) {
-        }
-        Node(nullptr_t)
-            : node_(nullptr) {
-        }
-        Node(Array array)
-            : node_(move(array)) {
-        }
-        Node(Dict map)
-            : node_(move(map)) {
-        }
-        Node(int value)
-            : node_(value) {
-        }
-        Node(double value)
-            : node_(value) {
-        }
-        Node(std::string value)
-            : node_(move(value)) {
-        }
+
+        using NodeType::variant;
 
         bool IsNull() const;
         bool IsInt() const;
@@ -62,15 +42,13 @@ namespace json {
 
         const NodeType& GetValue() const;
 
-        bool operator==(const Node& rhs) const {
-            return (node_ == rhs.node_);
+        friend bool operator==(const Node& lhs, const Node& rhs) {
+            return static_cast<NodeType>(lhs) == static_cast<NodeType>(rhs);
         }
-        bool operator!=(const Node& rhs) const {
-            return !(node_ == rhs.node_);
+        friend bool operator!=(const Node& lhs, const Node& rhs) {
+            return !(lhs == rhs);
         }
 
-    private:
-        NodeType node_;
     };
 
     class Document {
