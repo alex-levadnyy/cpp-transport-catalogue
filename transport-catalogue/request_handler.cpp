@@ -6,7 +6,7 @@ domain::RouteInfo RequestHandler::GetRouteInfo(const std::string &route_name) co
     return catalogue_.GetRouteInfo(route_name);
 }
 
-std::optional<std::reference_wrapper<const std::set<std::string_view> > >
+std::optional<std::reference_wrapper<const std::set<std::string_view>>>
 RequestHandler::GetBusesThroughStop(const std::string &stop_name) const {
     return catalogue_.GetBusesThroughStop(stop_name);
 }
