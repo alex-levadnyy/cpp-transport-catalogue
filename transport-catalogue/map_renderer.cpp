@@ -18,9 +18,10 @@ void MapRenderer::SetSettings(const RenderSettings &settings) {
 }
 
 svg::Document MapRenderer::RenderMap(const transport_catalogue::TransportCatalogue &catalogue) {
+
     field_size_ = ComputeFieldSize(catalogue);
 
-    const auto &routes = catalogue.GetBuses();
+    const auto &routes = catalogue.GetRoutes();
     const auto &stops = catalogue.GetStops();
 
     Routes sorted_routes;
@@ -54,7 +55,7 @@ void MapRenderer::RenderLines(svg::Document& doc, const Routes &routes) const {
             for (auto iter = route.second->stops.begin(); iter < route.second->stops.end(); ++iter) {
                 line.AddPoint(GetRelativePoint((*iter)->coordinate));
             }
-            if (!route.second->route_type) {
+            if (route.second->route_type == domain::RouteType::LINEAR) {
                 for (auto iter = std::next(route.second->stops.rbegin()); iter < route.second->stops.rend(); ++iter) {
                     line.AddPoint(GetRelativePoint((*iter)->coordinate));
                 }
@@ -83,7 +84,7 @@ void MapRenderer::RenderRouteNames(svg::Document &doc, const Routes &routes) con
                     SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             doc.Add(underlayer_text);
             doc.Add(text);
-            if (!route.second->route_type &&
+            if (route.second->route_type == domain::RouteType::LINEAR &&
                     route.second->stops.back() != route.second->stops.front()) {
                 text.SetPosition(GetRelativePoint(route.second->stops.back()->coordinate));
                 underlayer_text.SetPosition(GetRelativePoint(route.second->stops.back()->coordinate));

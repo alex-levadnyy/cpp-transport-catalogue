@@ -1,24 +1,25 @@
 #pragma once
 
-#include "json.h"
-
 #include <string>
 #include <variant>
 #include <vector>
-#include <optional>
+
+#include "json.h"
 
 namespace json {
 
-    class KeyItemContext;
-    class KeyValueItemContext;
-    class DictItemContext;
-    class ArrayItemContext;
-
     class Builder final {
+
+        class ItemContext;
+        class KeyItemContext;
+        class KeyValueItemContext;
+        class DictItemContext;
+        class ArrayItemContext;
+
     public:
         Builder() = default;
 
-        // выбрасывает исключение std::logic_error если на момент вызова объект некорректен
+        // РІС‹Р±СЂР°СЃС‹РІР°РµС‚ РёСЃРєР»СЋС‡РµРЅРёРµ std::logic_error РµСЃР»Рё РЅР° РјРѕРјРµРЅС‚ РІС‹Р·РѕРІР° РѕР±СЉРµРєС‚ РЅРµРєРѕСЂСЂРµРєС‚РµРЅ
         const Node& Build() const;
 
         KeyItemContext Key(std::string key);
@@ -31,56 +32,60 @@ namespace json {
         Builder& EndArray();
 
     private:
-        // В зависимости от тип value добавляет новый указатель в nodes_stack_
+        // Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРї value РґРѕР±Р°РІР»СЏРµС‚ РЅРѕРІС‹Р№ СѓРєР°Р·Р°С‚РµР»СЊ РІ nodes_stack_
         void AddRef(const Node& value);
-        bool IsEmpty() const;
 
         Node root_;
         std::vector<Node*> nodes_stack_;
-        std::optional<std::string> key_;
-
+        // РџРѕ СѓРјРѕРѕР»С‡Р°РЅРёСЋ СЃР»РѕРІР°СЂСЊ РїСѓСЃС‚
+        bool is_empty_ = true;
+        // РќР°Р»РёС‡РёРµ РІРІРµРґРµРЅРЅРѕРіРѕ РєР»СЋС‡Р°
+        bool has_key_ = false;
+        std::string key_;
+        
     };
 
-    // Вспомогательные классы
+    // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РєР»Р°СЃСЃС‹
 
-    class ItemContext {
+    class Builder::ItemContext {
     public:
         ItemContext(Builder& builder) : builder_{ builder } {}
     protected:
-        Builder& builder_;
-
         KeyItemContext Key(std::string key);
         DictItemContext StartDict();
         Builder& EndDict();
         ArrayItemContext StartArray();
         Builder& EndArray();
+
+        Builder& builder_;
     };
 
-    class KeyValueItemContext final : public ItemContext {
+    class Builder::KeyValueItemContext final : public ItemContext {
     public:
-        KeyValueItemContext(Builder& builder);
+        using ItemContext::ItemContext;
         using ItemContext::Key;
         using ItemContext::EndDict;
+
     };
 
-    class KeyItemContext final : public ItemContext {
+    class Builder::KeyItemContext final : public ItemContext {
     public:
-        KeyItemContext(Builder& builder);
+        using ItemContext::ItemContext;
         KeyValueItemContext Value(NodeType value);
         using ItemContext::StartDict;
         using ItemContext::StartArray;
     };
 
-    class DictItemContext final : public ItemContext {
+    class Builder::DictItemContext final : public ItemContext {
     public:
-        DictItemContext(Builder& builder);
+        using ItemContext::ItemContext;
         using ItemContext::Key;
         using ItemContext::EndDict;
     };
 
-    class ArrayItemContext final : public ItemContext {
+    class Builder::ArrayItemContext final : public ItemContext {
     public:
-        ArrayItemContext(Builder& builder);
+        using ItemContext::ItemContext;
         ArrayItemContext Value(NodeType value);
         using ItemContext::StartDict;
         using ItemContext::StartArray;

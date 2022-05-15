@@ -16,15 +16,14 @@ struct Point {
         : x(x)
         , y(y) {
     }
-    double x = 0.0;
-    double y = 0.0;
+    double x = 0;
+    double y = 0;
 };
 
 /*
  * Вспомогательная структура, хранящая контекст для вывода SVG-документа с отступами.
  * Хранит ссылку на поток вывода, текущее значение и шаг отступа при выводе элемента
  */
-
 struct RenderContext {
     RenderContext(std::ostream &out)
         : out(out) {
@@ -37,7 +36,7 @@ struct RenderContext {
     RenderContext Indented() const {
         return {out, indent_step, indent + indent_step};
     }
-    void Indention() const {
+    void RenderIndent() const {
         for (int i = 0; i < indent; ++i) {
             out.put(' ');
         }
@@ -67,9 +66,7 @@ struct Rgba {
 };
 
 using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
-
 inline const Color NoneColor{};
-
 struct OstreamColorPrinter {
     std::ostream& out;
     void operator()(std::monostate) const;
@@ -77,7 +74,6 @@ struct OstreamColorPrinter {
     void operator()(Rgb) const;
     void operator()(Rgba) const;
 };
-
 std::ostream& operator<<(std::ostream &out, Color color);
 
 enum class StrokeLineCap {
@@ -103,7 +99,6 @@ inline std::ostream& operator<<(std::ostream &out, StrokeLineJoin line_join) {
     out << TagStrokeLineJoin(line_join);
     return out;
 }
-
 
 template <typename Owner>
 class PathProps {
@@ -144,10 +139,8 @@ private:
 // Класс ObjectContainer - реализует интерфейс для доступа к контейнеру SVG-объектов.
 class ObjectContainer {
 public:
-
     template <class Obj>
     void Add(Obj obj) {
-
         AddPtr(std::make_unique<Obj>(std::move(obj)));
     }
     virtual void AddPtr(std::unique_ptr<Object> &&obj) = 0;
@@ -164,9 +157,7 @@ public:
 // Класс Document - контейнер SVG-объектов с выводом в поток
 class Document final : public ObjectContainer {
 public:
-
     void AddPtr(std::unique_ptr<Object> &&obj) override;
-
     void Render(std::ostream &out) const;
 private:
     std::vector<std::unique_ptr<Object>> objects_;
@@ -187,7 +178,6 @@ private:
 // Класс Polyline моделирует элемент <polyline> для отображения ломаных линий
 class Polyline final : public Object, public PathProps<Polyline> {
 public:
-
     Polyline& AddPoint(Point point);
 private:
     void RenderObject(const RenderContext &context) const override;

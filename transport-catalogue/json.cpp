@@ -283,35 +283,35 @@ namespace json {
         };
     }  // namespace
 
-    bool Node::IsNull() const {
+    bool Node::IsNull() const noexcept {
         return std::holds_alternative<nullptr_t>(*this);
     }
 
-    bool Node::IsInt() const {
+    bool Node::IsInt() const noexcept {
         return std::holds_alternative<int>(*this);
     }
 
-    bool Node::IsDouble() const {
+    bool Node::IsDouble() const noexcept {
         return IsInt() || IsPureDouble();
     }
 
-    bool Node::IsPureDouble() const {
+    bool Node::IsPureDouble() const noexcept {
         return std::holds_alternative<double>(*this);
     }
 
-    bool Node::IsBool() const {
+    bool Node::IsBool() const noexcept {
         return std::holds_alternative<bool>(*this);
     }
 
-    bool Node::IsString() const {
+    bool Node::IsString() const noexcept {
         return std::holds_alternative<std::string>(*this);
     }
 
-    bool Node::IsArray() const {
+    bool Node::IsArray() const noexcept {
         return std::holds_alternative<Array>(*this);
     }
 
-    bool Node::IsMap() const {
+    bool Node::IsMap() const noexcept {
         return std::holds_alternative<Dict>(*this);
     }
 

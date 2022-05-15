@@ -1,4 +1,5 @@
 #pragma once
+
 #include "domain.h"
 #include "svg.h"
 #include "transport_catalogue.h"
@@ -9,30 +10,31 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace renderer {
 
-
 struct RenderSettings {
-
     svg::Point size;
 
     double padding = 0.0;
+
     double line_width = 0.0;
-    double stop_radius = 0.0;
+    double stop_radius = 0;
+
     int bus_label_font_size = 0;
     svg::Point bus_label_offset;
+
     int stop_label_font_size = 0;
     svg::Point stop_label_offset;
+
     svg::Color underlayer_color;
     double underlayer_width = 0.0;
+
     std::vector<svg::Color> color_palette;
 };
 
-// класс для отрисовки маршрутов в формате svg
+// Класс для отрисовки маршрутов в формате svg
 class MapRenderer final {
 public:
-
     using Routes = std::map<std::string_view, const domain::Bus*>;
     using Stops = std::map<std::string_view, const domain::Stop*>;
     using BusesOnStops = std::unordered_map<std::string_view, std::set<std::string_view>>;
@@ -59,3 +61,6 @@ private:
 };
 
 } // namespace renderer
+
+
+

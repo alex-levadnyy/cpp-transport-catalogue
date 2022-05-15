@@ -24,14 +24,14 @@ namespace json {
 
         using NodeType::variant;
 
-        bool IsNull() const;
-        bool IsInt() const;
-        bool IsDouble() const;
-        bool IsPureDouble() const;
-        bool IsBool() const;
-        bool IsString() const;
-        bool IsArray() const;
-        bool IsMap() const;
+        bool IsNull() const noexcept;
+        bool IsInt() const noexcept;
+        bool IsDouble() const noexcept;
+        bool IsPureDouble() const noexcept;
+        bool IsBool() const noexcept;
+        bool IsString() const noexcept;
+        bool IsArray() const noexcept;
+        bool IsMap() const noexcept;
 
         bool AsBool() const;
         int AsInt() const;
@@ -71,4 +71,15 @@ namespace json {
 
     void Print(const Document& doc, std::ostream& output);
     void PrintNode(const Node& node, std::ostream& output);
+
+    struct RenderContext {
+            RenderContext(std::ostream &out, int indent = 0) : out(out), indent(indent) {}
+            void RenderIndent() const {
+                for (int i = 0; i < indent; ++i) {
+                    out.put(' ');
+                }
+            }
+            std::ostream &out;
+            int indent = 0;
+    };
 }  // namespace json

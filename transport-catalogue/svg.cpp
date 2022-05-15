@@ -9,8 +9,11 @@ using namespace std::literals;
 // ---------- Object ------------------
 
 void Object::Render(const RenderContext &context) const {
-    context.Indention();
+    context.RenderIndent();
+
+    // Делегируем вывод тега своим подклассам
     RenderObject(context);
+
     context.out << std::endl;
 }
 
@@ -21,12 +24,15 @@ void Document::AddPtr(std::unique_ptr<Object> &&obj) {
 }
 
 void Document::Render(std::ostream &out) const {
+    // выводим шапку документа
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"sv << std::endl;
     out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">"sv << std::endl;
+    // выводим все объекты
     RenderContext ctx(out, 2, 2);
     for (const auto &object : objects_) {
         object->Render(ctx);
     }
+    // выводим закрывающий тег
     out << "</svg>"sv;
 }
 
