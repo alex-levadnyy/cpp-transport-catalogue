@@ -14,16 +14,15 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace transport_catalogue {
 
-    // Основной класс ТК
-    class TransportCatalogue final {
-
+// TransportCatalogue основной класс транспортного каталога
+class TransportCatalogue final {
+    
 public:
     // Создает маршрут из остановок
-    void AddBus(const std::string& bus_name, domain::RouteType bus_type, const std::vector<std::string>& stops);
-    // Добавляет остановку
+    void AddBus(const std::string& route_name, domain::RouteType route_type, const std::vector<std::string>& stops);
+    // добавляет остановку в каталог
     void AddStop(const std::string &stop_name, geo::Coordinates coordinate);
     
     // Добавляет расстояние между остановками
@@ -31,15 +30,17 @@ public:
     // Возвращет расстояние между остановками в прям или обратном направлении
     int GetDistance(const std::string& stop_from, const std::string& stop_to) const;
     // Возвращает структуру RouteInfo по названию автобуса
-    domain::RouteInfo GetRouteInfo(const std::string & bus_name) const;
+    domain::RouteInfo GetRouteInfo(const std::string &route_name) const;
 
     // Возвращает автобусы, проходящие через остановку
     std::optional<std::reference_wrapper<const std::set<std::string_view>>>
-    GetBusesThroughStop(const std::string &stop_name) const;
-        
+    GetBusesOnStop(const std::string &stop_name) const;
+    
     const std::unordered_map<std::string_view, const domain::Bus*>& GetRoutes() const;
     const std::unordered_map<std::string_view, const domain::Stop*>& GetStops() const;
     const std::unordered_map<std::string_view, std::set<std::string_view>>& GetBusesOnStops() const;
+
+    const std::unordered_map<std::string_view, std::unordered_map<std::string_view, int>>& GetDistances() const;
 
 
 private:
@@ -48,11 +49,11 @@ private:
     // Добавляет автобус
     void AddBus(domain::Bus bus) noexcept;
     // Возвращает указатель на остановку по её имени
-    const domain::Stop* GetStop(const std::string &stop_name) const;
+    const domain::Stop* GetStop(const std::string& stop_name) const;
     // Возвращает указатель на автобус по его имени
-    const domain::Bus* GetBus(const std::string &route_name) const;
+    const domain::Bus* GetBus(const std::string& route_name) const;
     // Возвращает расстояние между остановками в прямом направлении
-    int GetForwardDistance(const std::string &stop_from, const std::string &stop_to) const;
+    int GetForwardDistance(const std::string& stop_from, const std::string& stop_to) const;
     // Считает общее расстояние по маршруту
     int CalculateRealRouteLength(const domain::Bus* bus) const;
 
@@ -66,6 +67,7 @@ private:
     std::unordered_map<std::string_view, const domain::Bus*> bus_by_name_;
     // Расстояния между остановками
     std::unordered_map<std::string_view, std::unordered_map<std::string_view, int>> stops_to_dist_;
+
 };
 
 // Считает количество остановок на маршруте

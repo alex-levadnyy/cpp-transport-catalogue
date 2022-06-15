@@ -1,9 +1,9 @@
 #pragma once
 
+#include "geo.h"
+
 #include <string>
 #include <vector>
-
-#include "geo.h"
 
 namespace domain {
 
@@ -28,15 +28,15 @@ struct RouteInfo {
 struct Stop {
     std::string name;
     geo::Coordinates coordinate;
-    friend bool operator==(const Stop &lhs, const Stop &rhs);
+    friend bool operator==(const Stop& lhs, const Stop& rhs);
 };
 
 // Автобус: имя (номера автобуса), тип и список остановок
 struct Bus {
     std::string name;
     RouteType route_type = RouteType::UNKNOWN;
-    std::vector<const Stop*> stops; 
-    friend bool operator==(const Bus&lhs, const Bus&rhs);
+    std::vector<const Stop*> stops;
+    friend bool operator==(const Bus& lhs, const Bus& rhs);
 };
 
 } // namespace domain
