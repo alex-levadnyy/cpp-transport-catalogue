@@ -202,7 +202,7 @@ Node LoadNode(std::istream& input) {
 struct NodePrinter {
     std::ostream& out;
 
-    void operator()(nullptr_t) const {
+    void operator()(std::nullptr_t) const {
         out << "null"s;
     }
 
