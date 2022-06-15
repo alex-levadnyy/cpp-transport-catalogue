@@ -1,6 +1,6 @@
-#include <unordered_map>
-
 #include "svg.h"
+
+#include <unordered_map>
 
 namespace svg {
 

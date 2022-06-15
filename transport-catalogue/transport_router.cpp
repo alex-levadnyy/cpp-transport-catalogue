@@ -3,21 +3,26 @@
 namespace transport_router {
 
 TransportRouter::TransportRouter(const transport_catalogue::TransportCatalogue &catalogue,
-                                 int wait_time, int velocity)
-                                : settings_{wait_time, (velocity * KMH_TO_MMIN)}
-                                , catalogue_{catalogue} {
-    graph::DirectedWeightedGraph<RouteEdge> graph(CountStops());
-    graph_ = std::move(graph);
-    BuildEdges();
+                                 const RoutingSettings &settings)
+                                : catalogue_(catalogue), settings_(settings) {
 }
 
-std::optional<TransportRoute> TransportRouter::BuildRoute(const std::string &from, const std::string &to) {
+void TransportRouter::InitRouter() {
+    if (!is_initialized_) {
+        graph::DirectedWeightedGraph<RouteWeight>graph(CountStops());
+        graph_ = std::move(graph);
+        BuildEdges();
+        router_ = std::make_unique<graph::Router<RouteWeight>>(graph_);
+        is_initialized_ = true;
+    }
+}
+
+std::optional<TransportRouter::TransportRoute>
+TransportRouter::BuildRoute(const std::string &from, const std::string &to) {
     if (from == to) {
         return TransportRoute{};
     }
-    if (!router_) {
-        router_ = std::make_unique<graph::Router<RouteEdge>>(graph_);
-    }
+    InitRouter();
     auto from_id = id_by_stop_name_.at(from);
     auto to_id = id_by_stop_name_.at(to);
     auto route = router_->BuildRoute(from_id, to_id);
@@ -28,7 +33,7 @@ std::optional<TransportRoute> TransportRouter::BuildRoute(const std::string &fro
     TransportRoute result;
     for (auto edge_id : route->edges) {
         const auto &edge = graph_.GetEdge(edge_id);
-        RouteEdge route_edge;
+        RouterEdge route_edge;
         route_edge.bus_name = edge.weight.bus_name;
         route_edge.stop_from = stops_by_id_.at(edge.from)->name;
         route_edge.stop_to = stops_by_id_.at(edge.to)->name;
@@ -39,8 +44,44 @@ std::optional<TransportRoute> TransportRouter::BuildRoute(const std::string &fro
     return result;
 }
 
-const TransportRouter::RoutingSettings &TransportRouter::GetSettings() const {
+const TransportRouter::RoutingSettings& TransportRouter::GetSettings() const {
     return settings_;
+}
+
+TransportRouter::RoutingSettings& TransportRouter::GetSettings() {
+    return settings_;
+}
+
+void TransportRouter::InternalInit() {
+    is_initialized_ = true;
+}
+
+TransportRouter::Graph& TransportRouter::GetGraph() {
+    return graph_;
+}
+const TransportRouter::Graph& TransportRouter::GetGraph() const {
+    return graph_;
+}
+
+std::unique_ptr<TransportRouter::Router>& TransportRouter::GetRouter() {
+    return router_;
+}
+const std::unique_ptr<TransportRouter::Router>& TransportRouter::GetRouter() const {
+    return router_;
+}
+
+TransportRouter::StopsById& TransportRouter::GetStopsById() {
+    return stops_by_id_;
+}
+const TransportRouter::StopsById& TransportRouter::GetStopsById() const {
+    return stops_by_id_;
+}
+
+TransportRouter::IdsByStopName &TransportRouter::GetIdsByStopName() {
+    return id_by_stop_name_;
+}
+const TransportRouter::IdsByStopName &TransportRouter::GetIdsByStopName() const {
+    return id_by_stop_name_;
 }
 
 void TransportRouter::BuildEdges() {
@@ -50,14 +91,14 @@ void TransportRouter::BuildEdges() {
             double route_time = settings_.wait_time;
             double route_time_back = settings_.wait_time;
             for(int j = i + 1; j < stops_count; ++j) {
-                graph::Edge<RouteEdge> edge = MakeEdge(route, i, j);
+                graph::Edge<RouteWeight> edge = MakeEdge(route, i, j);
                 route_time += ComputeRouteTime(route, j - 1, j);
                 edge.weight.total_time = route_time;
                 graph_.AddEdge(edge);
                 if (route->route_type == domain::RouteType::LINEAR) {
                     int i_back = stops_count - 1 - i;
                     int j_back = stops_count - 1 - j;
-                    graph::Edge<RouteEdge> edge = MakeEdge(route, i_back, j_back);
+                    graph::Edge<RouteWeight> edge = MakeEdge(route, i_back, j_back);
                     route_time_back += ComputeRouteTime(route, j_back + 1, j_back);
                     edge.weight.total_time = route_time_back;
                     graph_.AddEdge(edge);
@@ -79,9 +120,10 @@ size_t TransportRouter::CountStops() {
     return stops_counter;
 }
 
-graph::Edge<RouteEdge> TransportRouter::MakeEdge(const domain::Bus* route,
+graph::Edge<RouteWeight> TransportRouter::MakeEdge(const domain::Bus *route,
                                                  int stop_from_index, int stop_to_index) {
-    graph::Edge<RouteEdge> edge;
+
+    graph::Edge<RouteWeight> edge;
     edge.from = id_by_stop_name_.at(route->stops.at(static_cast<size_t>(stop_from_index))->name);
     edge.to = id_by_stop_name_.at(route->stops.at(static_cast<size_t>(stop_to_index))->name);
     edge.weight.bus_name = route->name;
@@ -89,24 +131,24 @@ graph::Edge<RouteEdge> TransportRouter::MakeEdge(const domain::Bus* route,
     return edge;
 }
 
-double TransportRouter::ComputeRouteTime(const domain::Bus* route, int stop_from_index, int stop_to_index) {
+double TransportRouter::ComputeRouteTime(const domain::Bus *route, int stop_from_index, int stop_to_index) {
     auto split_distance =
             catalogue_.GetDistance(route->stops.at(static_cast<size_t>(stop_from_index))->name,
                                     route->stops.at(static_cast<size_t>(stop_to_index))->name);
     return split_distance / settings_.velocity;
 }
 
-bool operator<(const RouteEdge &left, const RouteEdge &right) {
+bool operator<(const RouteWeight &left, const RouteWeight &right) {
     return left.total_time < right.total_time;
 }
 
-RouteEdge operator+(const RouteEdge &left, const RouteEdge &right) {
-    RouteEdge result;
+RouteWeight operator+(const RouteWeight &left, const RouteWeight &right) {
+    RouteWeight result;
     result.total_time = left.total_time + right.total_time;
     return result;
 }
 
-bool operator>(const RouteEdge &left, const RouteEdge &right) {
+bool operator>(const RouteWeight &left, const RouteWeight &right) {
     return left.total_time > right.total_time;
 }
 

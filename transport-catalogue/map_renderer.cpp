@@ -6,34 +6,34 @@ namespace renderer {
 
 namespace {
 
-inline const double EPSILON = 1e-6;
-bool IsZero(double value) {
-    return std::abs(value) < EPSILON;
-}
+    inline const double EPSILON = 1e-6;
+    bool IsZero(double value) {
+        return std::abs(value) < EPSILON;
+    }
 
 } // namespace
 
-void MapRenderer::SetSettings(const RenderSettings &settings) {
+void MapRenderer::SetSettings(const RenderSettings& settings) {
     settings_ = settings;
 }
 
-svg::Document MapRenderer::RenderMap(const transport_catalogue::TransportCatalogue &catalogue) {
+svg::Document MapRenderer::RenderMap(const transport_catalogue::TransportCatalogue& catalogue) {
 
     field_size_ = ComputeFieldSize(catalogue);
 
-    const auto &routes = catalogue.GetRoutes();
-    const auto &stops = catalogue.GetStops();
+    const auto& routes = catalogue.GetRoutes();
+    const auto& stops = catalogue.GetStops();
 
     Routes sorted_routes;
     Stops sorted_stops;
-    for (auto &route : routes) {
+    for (auto& route : routes) {
         sorted_routes.insert(route);
     }
-    for (auto &stop : stops) {
+    for (auto& stop : stops) {
         sorted_stops.insert(stop);
     }
 
-    const auto &buses_on_stops = catalogue.GetBusesOnStops();
+    const auto& buses_on_stops = catalogue.GetBusesOnStops();
 
     svg::Document doc;
     RenderLines(doc, sorted_routes);
@@ -43,15 +43,15 @@ svg::Document MapRenderer::RenderMap(const transport_catalogue::TransportCatalog
     return doc;
 }
 
-void MapRenderer::RenderLines(svg::Document& doc, const Routes &routes) const {
+void MapRenderer::RenderLines(svg::Document& doc, const Routes& routes) const {
     auto max_color_count = settings_.color_palette.size();
     size_t color_index = 0;
-    for (const auto &route : routes) {
+    for (const auto& route : routes) {
         if (route.second->stops.size() > 0) {
             svg::Polyline line;
             line.SetStrokeColor(settings_.color_palette.at(color_index % max_color_count)).
-                    SetFillColor(svg::NoneColor).SetStrokeWidth(settings_.line_width).
-                    SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+                SetFillColor(svg::NoneColor).SetStrokeWidth(settings_.line_width).
+                SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             for (auto iter = route.second->stops.begin(); iter < route.second->stops.end(); ++iter) {
                 line.AddPoint(GetRelativePoint((*iter)->coordinate));
             }
@@ -66,26 +66,26 @@ void MapRenderer::RenderLines(svg::Document& doc, const Routes &routes) const {
     }
 }
 
-void MapRenderer::RenderRouteNames(svg::Document &doc, const Routes &routes) const {
+void MapRenderer::RenderRouteNames(svg::Document& doc, const Routes& routes) const {
     auto max_color_count = settings_.color_palette.size();
     size_t color_index = 0;
-    for (const auto &route : routes) {
+    for (const auto& route : routes) {
         if (route.second->stops.size() > 0) {
             svg::Text text, underlayer_text;
             text.SetData(std::string(route.first)).
-                    SetPosition(GetRelativePoint(route.second->stops.front()->coordinate)).
-                    SetOffset(settings_.bus_label_offset).
-                    SetFontSize(static_cast<std::uint32_t>(settings_.bus_label_font_size)).
-                    SetFontFamily("Verdana"s).SetFontWeight("bold");
+                SetPosition(GetRelativePoint(route.second->stops.front()->coordinate)).
+                SetOffset(settings_.bus_label_offset).
+                SetFontSize(static_cast<std::uint32_t>(settings_.bus_label_font_size)).
+                SetFontFamily("Verdana"s).SetFontWeight("bold");
             underlayer_text = text;
             text.SetFillColor(settings_.color_palette.at(color_index % max_color_count));
             underlayer_text.SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color).
-                    SetStrokeWidth(settings_.underlayer_width).
-                    SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+                SetStrokeWidth(settings_.underlayer_width).
+                SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             doc.Add(underlayer_text);
             doc.Add(text);
             if (route.second->route_type == domain::RouteType::LINEAR &&
-                    route.second->stops.back() != route.second->stops.front()) {
+                route.second->stops.back() != route.second->stops.front()) {
                 text.SetPosition(GetRelativePoint(route.second->stops.back()->coordinate));
                 underlayer_text.SetPosition(GetRelativePoint(route.second->stops.back()->coordinate));
                 doc.Add(underlayer_text);
@@ -96,30 +96,30 @@ void MapRenderer::RenderRouteNames(svg::Document &doc, const Routes &routes) con
     }
 }
 
-void MapRenderer::RenderStops(svg::Document &doc, const Stops &stops, const BusesOnStops &buses_on_stops) const {
-    for (const auto &stop : stops) {
+void MapRenderer::RenderStops(svg::Document& doc, const Stops& stops, const BusesOnStops& buses_on_stops) const {
+    for (const auto& stop : stops) {
         if (buses_on_stops.count(stop.first) != 0) {
             svg::Circle circle;
             circle.SetCenter(GetRelativePoint(stop.second->coordinate)).
-                    SetRadius(settings_.stop_radius).SetFillColor("white"s);
+                SetRadius(settings_.stop_radius).SetFillColor("white"s);
             doc.Add(circle);
         }
     }
 }
 
-void MapRenderer::RenderStopNames(svg::Document &doc, const Stops &stops, const BusesOnStops &buses_on_stops) const {
-    for (const auto &stop : stops) {
+void MapRenderer::RenderStopNames(svg::Document& doc, const Stops& stops, const BusesOnStops& buses_on_stops) const {
+    for (const auto& stop : stops) {
         if (buses_on_stops.count(stop.first) != 0) {
             svg::Text text, underlayer_text;
             text.SetData(std::string(stop.first)).SetPosition(GetRelativePoint(stop.second->coordinate)).
-                    SetOffset(settings_.stop_label_offset).
-                    SetFontSize(static_cast<std::uint32_t>(settings_.stop_label_font_size)).
-                    SetFontFamily("Verdana");
+                SetOffset(settings_.stop_label_offset).
+                SetFontSize(static_cast<std::uint32_t>(settings_.stop_label_font_size)).
+                SetFontFamily("Verdana");
             underlayer_text = text;
             text.SetFillColor("black");
             underlayer_text.SetFillColor(settings_.underlayer_color).SetStrokeColor(settings_.underlayer_color).
-                    SetStrokeWidth(settings_.underlayer_width).
-                    SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
+                SetStrokeWidth(settings_.underlayer_width).
+                SetStrokeLineCap(svg::StrokeLineCap::ROUND).SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
             doc.Add(underlayer_text);
             doc.Add(text);
         }
@@ -134,13 +134,16 @@ svg::Point MapRenderer::GetRelativePoint(geo::Coordinates coordinate) const {
 
     if (IsZero(field_width) && IsZero(field_height)) {
         zoom_coef = 0;
-    } else if (IsZero(field_width)) {
+    }
+    else if (IsZero(field_width)) {
         zoom_coef = (settings_.size.y - 2 * settings_.padding) / field_height;
-    } else if (IsZero(field_height)) {
+    }
+    else if (IsZero(field_height)) {
         zoom_coef = (settings_.size.x - 2 * settings_.padding) / field_width;
-    } else {
+    }
+    else {
         zoom_coef = std::min((settings_.size.y - 2 * settings_.padding) / field_height,
-                (settings_.size.x - 2 * settings_.padding) / field_width);
+            (settings_.size.x - 2 * settings_.padding) / field_width);
     }
 
     svg::Point result;
@@ -150,12 +153,12 @@ svg::Point MapRenderer::GetRelativePoint(geo::Coordinates coordinate) const {
 }
 
 std::pair<geo::Coordinates, geo::Coordinates>
-MapRenderer::ComputeFieldSize(const transport_catalogue::TransportCatalogue &catalogue) const {
-    geo::Coordinates min{90.0, 180.0};
-    geo::Coordinates max{-90.0, -180.0};
-    for (const auto &stop : catalogue.GetStops()) {
-        if (catalogue.GetBusesThroughStop(std::string(stop.first))) {
-            const auto &coordinates = stop.second->coordinate;
+    MapRenderer::ComputeFieldSize(const transport_catalogue::TransportCatalogue& catalogue) const {
+    geo::Coordinates min{ 90.0, 180.0 };
+    geo::Coordinates max{ -90.0, -180.0 };
+    for (const auto& stop : catalogue.GetStops()) {
+        if (catalogue.GetBusesOnStop(std::string(stop.first))) {
+            const auto& coordinates = stop.second->coordinate;
             if (coordinates.lat < min.lat) {
                 min.lat = coordinates.lat;
             }

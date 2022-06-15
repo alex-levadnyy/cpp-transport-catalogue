@@ -4,7 +4,7 @@ namespace json {
 
     using namespace std;
 
-     const Node& Builder::Build() const {
+    const Node& Builder::Build() const {
         // Если строитель пустой или есть незакрытые контейнеры
         if (is_empty_ || !nodes_stack_.empty()) {
             throw std::logic_error("Builder state is invalid"s);
